@@ -73,9 +73,9 @@ public class Cell {
       return null; // Or appropriate value if the year is not found
   }
 
-    // Getters and other methods as needed for processing
+    
 
-    // Mainly for debugging purposes to view cell info
+    
   @Override
   public String toString() {
       return String.format("OEM: %s, Model: %s, Launch Year: %s, Body Weight: %s g, Launch Status: %s, Body Dimensions: %s, SIM: %s, Display Type: %s, Display Size: %s inches, Display Resolution: %s, Sensors: %s, OS: %s",

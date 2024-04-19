@@ -59,7 +59,7 @@ public class Main {
       for (char c : line.toCharArray()) {
           if (c == '"') {
               inQuotes = !inQuotes; // Toggle state
-              continue; // Skip adding quote marks to the field content
+              continue; 
           }
           if (c == ',' && !inQuotes) {
               fields.add(fieldBuilder.toString().trim()); // Trim whitespace and add field
