@@ -1,5 +1,9 @@
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
 
 public class Cell {
     // Attributes
@@ -7,7 +11,7 @@ public class Cell {
     private String model;
     private Integer launchAnnounced;
     private Float bodyWeight;
-    private String launchStatus;
+    private Integer launchStatus;
     private String bodyDimensions;
     private String bodySim;
     private String displayType;
@@ -20,8 +24,8 @@ public class Cell {
   public Cell(String[] fields) {
       this.oem = fields.length > 0 ? fields[0] : null;
       this.model = fields.length > 1 ? fields[1] : null;
-      this.launchAnnounced = fields.length > 2 ? parseYear(fields[2]) : null;
-      this.launchStatus = fields.length > 3 ? fields[3] : null;
+      this.launchAnnounced = fields.length > 2 ? extractYear(fields[2]) : null;
+      this.launchStatus = fields.length > 3 ? extractYear(fields[3]) : null;
       this.bodyDimensions = fields.length > 4 ? fields[4] : null;
       this.bodyWeight = fields.length > 5 ? parseWeight(fields[5]) : null;
       this.bodySim = fields.length > 6 ? fields[6] : null;
@@ -60,6 +64,14 @@ public class Cell {
         if (os.contains(",")) return os.substring(0, os.indexOf(','));
         return os;
     }
+  private static Integer extractYear(String text) {
+      Pattern pattern = Pattern.compile("(\\d{4})");
+      Matcher matcher = pattern.matcher(text);
+      if (matcher.find()) {
+          return Integer.parseInt(matcher.group(1));
+      }
+      return null; // Or appropriate value if the year is not found
+  }
 
     // Getters and other methods as needed for processing
 
@@ -81,5 +93,123 @@ public class Cell {
           platformOS != null ? platformOS : "Unknown" // Operating system, or "Unknown" if null
       );
   }
+
+  public String getOem() {
+      return oem;
+  }
+
+  public String getModel() {
+      return model;
+  }
+
+  public Integer getLaunchAnnounced() {
+      return launchAnnounced;
+  }
+
+  public Float getBodyWeight() {
+      return bodyWeight;
+  }
+
+  public Integer getLaunchStatus() {
+      return launchStatus;
+  }
+
+  public String getBodyDimensions() {
+      return bodyDimensions;
+  }
+
+  public String getBodySim() {
+      return bodySim;
+  }
+
+  public String getDisplayType() {
+      return displayType;
+  }
+
+  public Float getDisplaySize() {
+      return displaySize;
+  }
+
+  public String getDisplayResolution() {
+      return displayResolution;
+  }
+
+  public String getFeaturesSensors() {
+      return featuresSensors;
+  }
+
+  public String getPlatformOS() {
+      return platformOS;
+  }
+
+
+  // Assuming you add a new field for release year and modify the constructor accordingly
+
+  public static String oemWithHighestAverageWeight(HashMap<String, Cell> cells) {
+      HashMap<String, List<Float>> weights = new HashMap<>();
+      for (Cell cell : cells.values()) {
+          if (cell.getBodyWeight() != null) {
+              weights.putIfAbsent(cell.getOem(), new ArrayList<>());
+              weights.get(cell.getOem()).add(cell.getBodyWeight());
+          }
+      }
+
+      String highestOem = null;
+      float highestAvg = 0;
+      for (Map.Entry<String, List<Float>> entry : weights.entrySet()) {
+          float sum = 0;
+          for (Float weight : entry.getValue()) {
+              sum += weight;
+          }
+          float avg = sum / entry.getValue().size();
+          if (avg > highestAvg) {
+              highestAvg = avg;
+              highestOem = entry.getKey();
+          }
+      }
+      return highestOem;
+  }
+
+
+  public static List<String> phonesWithDifferentAnnounceReleaseYears(HashMap<String, Cell> cells) {
+      List<String> results = new ArrayList<>();
+      for (Cell cell : cells.values()) {
+          if (cell.getLaunchAnnounced() != null && cell.getLaunchStatus() != null &&
+              !cell.getLaunchAnnounced().equals(cell.getLaunchStatus())) {
+              results.add(cell.getOem() + " " + cell.getModel());
+          }
+      }
+      return results;
+  }
+
+  public static int countPhonesWithOneSensor(HashMap<String, Cell> cells) {
+      int count = 0;
+      for (Cell cell : cells.values()) {
+          if (cell.getFeaturesSensors() != null && cell.getFeaturesSensors().split(",").length == 1) {
+              count++;
+          }
+      }
+      return count;
+  }
+
+  public static int yearWithMostLaunchesPost1999(HashMap<String, Cell> cells) {
+      HashMap<Integer, Integer> yearCount = new HashMap<>();
+      for (Cell cell : cells.values()) {
+          if (cell.getLaunchAnnounced() != null && cell.getLaunchAnnounced() > 1999) {
+              yearCount.put(cell.getLaunchAnnounced(), yearCount.getOrDefault(cell.getLaunchAnnounced(), 0) + 1);
+          }
+      }
+
+      int maxYear = 0;
+      int maxCount = 0;
+      for (Map.Entry<Integer, Integer> entry : yearCount.entrySet()) {
+          if (entry.getValue() > maxCount) {
+              maxCount = entry.getValue();
+              maxYear = entry.getKey();
+          }
+      }
+      return maxYear;
+  }
+
 
 }
